@@ -1,9 +1,10 @@
 package com.example.batchprocessing;
 
+import java.io.File;
+
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -15,18 +16,19 @@ import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilde
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
-import org.springframework.batch.item.file.mapping.DefaultLineMapper;
-import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.core.io.FileSystemResource;
 
 // tag::setup[]
 @Configuration
 @EnableBatchProcessing
 public class BatchConfiguration {
+	
+	@Value("${data.folder}")
+	private String dataFolder;
 
 	@Autowired
 	public JobBuilderFactory jobBuilderFactory;
@@ -40,7 +42,7 @@ public class BatchConfiguration {
 	public FlatFileItemReader<Person> reader() {
 		return new FlatFileItemReaderBuilder<Person>()
 			.name("personItemReader")
-			.resource(new ClassPathResource("sample-data.csv"))
+			.resource(new FileSystemResource(new File(dataFolder + "/sample-data.csv")))
 			.delimited()
 			.names(new String[]{"firstName", "lastName"})
 			.fieldSetMapper(new BeanWrapperFieldSetMapper<Person>() {{
